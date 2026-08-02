@@ -36,9 +36,12 @@ that your phone and Mac are on the same Wi-Fi network.
 
 ```sh
 npm install
-npm run ios      # opens iOS Simulator
-# or: npx expo start, then scan the QR code with Expo Go on a real device
+npx expo start
 ```
+
+Scan the QR code with your iPhone's Camera app — it opens directly in
+[Expo Go](https://apps.apple.com/app/expo-go/id982107779), live-reloading as
+you edit. No Xcode or Simulator needed.
 
 The app tries to guess your Mac's LAN IP from the Expo dev server automatically.
 If it guesses wrong, or you're running on Expo Go on a physical device, open

@@ -17,7 +17,9 @@
   },
   "scripts": {
     "start": "expo start",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "rag-server": "node server/rag-server.mjs",
+    "import-chatgpt-history": "node scripts/import-chatgpt-export.mjs"
   },
   "private": true
 }

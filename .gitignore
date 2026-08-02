@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# personal chat history + embeddings — never commit these
+/server/data/

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { streamChat, OllamaError } from '../api/ollama';
+import { searchHistory } from '../api/rag';
 import { ChatInput } from '../components/ChatInput';
 import { MessageBubble } from '../components/MessageBubble';
 import { SettingsModal } from '../components/SettingsModal';
@@ -25,6 +26,8 @@ export function ChatScreen() {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [baseUrl, setBaseUrl] = useState('');
   const [model, setModel] = useState('');
+  const [ragUrl, setRagUrl] = useState('');
+  const [ragEnabled, setRagEnabled] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<FlatList<ChatMessage>>(null);
@@ -32,6 +35,8 @@ export function ChatScreen() {
   const loadSettings = useCallback(async () => {
     setBaseUrl(await settings.getBaseUrl());
     setModel(await settings.getModel());
+    setRagUrl(await settings.getRagUrl());
+    setRagEnabled(await settings.getRagEnabled());
   }, []);
 
   useEffect(() => {
@@ -49,11 +54,35 @@ export function ChatScreen() {
     const controller = new AbortController();
     abortRef.current = controller;
 
+    let apiMessages: ChatMessage[] = nextMessages;
+    if (ragEnabled) {
+      try {
+        const results = await searchHistory(ragUrl, text, 4);
+        if (results.length > 0) {
+          const context = results
+            .map((r) => `[${r.title}, ${r.createTime}]\n${r.text}`)
+            .join('\n\n---\n\n');
+          apiMessages = [
+            {
+              id: 'rag-context',
+              role: 'system',
+              content:
+                "Relevant excerpts from the user's past ChatGPT conversations. " +
+                `Use them only if helpful; ignore if irrelevant.\n\n${context}`,
+            },
+            ...nextMessages,
+          ];
+        }
+      } catch {
+        // RAG server unreachable or unconfigured — chat without retrieved context.
+      }
+    }
+
     try {
       await streamChat(
         baseUrl,
         model,
-        nextMessages,
+        apiMessages,
         (delta) => {
           setMessages((prev) =>
             prev.map((m) =>
@@ -71,11 +100,20 @@ export function ChatScreen() {
     }
   };
 
-  const handleSaveSettings = async (newBaseUrl: string, newModel: string) => {
+  const handleSaveSettings = async (
+    newBaseUrl: string,
+    newModel: string,
+    newRagUrl: string,
+    newRagEnabled: boolean
+  ) => {
     await settings.setBaseUrl(newBaseUrl);
     await settings.setModel(newModel);
+    await settings.setRagUrl(newRagUrl);
+    await settings.setRagEnabled(newRagEnabled);
     setBaseUrl(newBaseUrl);
     setModel(newModel);
+    setRagUrl(newRagUrl);
+    setRagEnabled(newRagEnabled);
     setSettingsVisible(false);
   };
 
@@ -114,6 +152,8 @@ export function ChatScreen() {
         visible={settingsVisible}
         baseUrl={baseUrl}
         model={model}
+        ragUrl={ragUrl}
+        ragEnabled={ragEnabled}
         onSave={handleSaveSettings}
         onClose={() => setSettingsVisible(false)}
       />

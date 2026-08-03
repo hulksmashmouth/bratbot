@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,6 +13,8 @@ import {
 } from 'react-native';
 import { listModels, OllamaError } from '../api/ollama';
 import { checkRagHealth } from '../api/rag';
+import { accentGradient, bgGradient, colors, radii, spacing } from '../theme';
+import { GlassView } from './GlassView';
 
 interface Props {
   visible: boolean;
@@ -86,8 +89,8 @@ export function SettingsModal({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={styles.container}>
-        <ScrollView keyboardShouldPersistTaps="handled">
+      <LinearGradient colors={bgGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.container}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
           <Text style={styles.title}>Settings</Text>
 
           <Text style={styles.label}>Ollama server URL</Text>
@@ -96,6 +99,7 @@ export function SettingsModal({
             value={urlInput}
             onChangeText={setUrlInput}
             placeholder="http://192.168.1.x:11434"
+            placeholderTextColor={colors.placeholder}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
@@ -107,13 +111,14 @@ export function SettingsModal({
             value={modelInput}
             onChangeText={setModelInput}
             placeholder="llama3.2"
+            placeholderTextColor={colors.placeholder}
             autoCapitalize="none"
             autoCorrect={false}
           />
 
           <Pressable style={styles.testButton} onPress={testConnection}>
             {status === 'checking' ? (
-              <ActivityIndicator color="#007AFF" />
+              <ActivityIndicator color={colors.textPrimary} />
             ) : (
               <Text style={styles.testButtonText}>Test connection</Text>
             )}
@@ -130,7 +135,12 @@ export function SettingsModal({
 
           <View style={styles.switchRow}>
             <Text style={styles.label}>Use imported chat history</Text>
-            <Switch value={ragEnabledInput} onValueChange={setRagEnabledInput} />
+            <Switch
+              value={ragEnabledInput}
+              onValueChange={setRagEnabledInput}
+              trackColor={{ false: colors.glassFillStrong, true: accentGradient[0] }}
+              thumbColor="#fff"
+            />
           </View>
 
           <Text style={styles.label}>RAG server URL</Text>
@@ -139,19 +149,16 @@ export function SettingsModal({
             value={ragUrlInput}
             onChangeText={setRagUrlInput}
             placeholder="http://192.168.1.x:11435"
+            placeholderTextColor={colors.placeholder}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
             editable={ragEnabledInput}
           />
 
-          <Pressable
-            style={styles.testButton}
-            onPress={testRagConnection}
-            disabled={!ragEnabledInput}
-          >
+          <Pressable style={styles.testButton} onPress={testRagConnection} disabled={!ragEnabledInput}>
             {ragStatus === 'checking' ? (
-              <ActivityIndicator color="#007AFF" />
+              <ActivityIndicator color={colors.textPrimary} />
             ) : (
               <Text style={[styles.testButtonText, !ragEnabledInput && styles.testButtonTextDisabled]}>
                 Check history index
@@ -170,19 +177,28 @@ export function SettingsModal({
         </ScrollView>
 
         <View style={styles.actions}>
-          <Pressable style={styles.actionButton} onPress={onClose}>
-            <Text style={styles.actionButtonText}>Cancel</Text>
-          </Pressable>
+          <GlassView style={styles.actionButton} intensity={30}>
+            <Pressable style={styles.actionButtonInner} onPress={onClose}>
+              <Text style={styles.actionButtonText}>Cancel</Text>
+            </Pressable>
+          </GlassView>
           <Pressable
-            style={[styles.actionButton, styles.saveButton]}
+            style={styles.saveButtonWrapper}
             onPress={() =>
               onSave(urlInput.trim(), modelInput.trim(), ragUrlInput.trim(), ragEnabledInput)
             }
           >
-            <Text style={[styles.actionButtonText, styles.saveButtonText]}>Save</Text>
+            <LinearGradient
+              colors={accentGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.actionButtonInner}
+            >
+              <Text style={[styles.actionButtonText, styles.saveButtonText]}>Save</Text>
+            </LinearGradient>
           </Pressable>
         </View>
-      </View>
+      </LinearGradient>
     </Modal>
   );
 }
@@ -190,28 +206,34 @@ export function SettingsModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: spacing.xl,
     paddingTop: 24,
-    backgroundColor: '#fff',
+  },
+  scrollContent: {
+    paddingBottom: spacing.lg,
   },
   title: {
     fontSize: 22,
     fontWeight: '700',
     marginBottom: 20,
+    color: colors.textPrimary,
   },
   label: {
     fontSize: 13,
-    color: '#6b6b70',
+    color: colors.textSecondary,
     marginBottom: 6,
     marginTop: 16,
     textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: '#f2f2f7',
-    borderRadius: 10,
+    backgroundColor: colors.inputBg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.glassBorder,
+    borderRadius: radii.sm,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
+    color: colors.textPrimary,
   },
   testButton: {
     marginTop: 20,
@@ -219,26 +241,26 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   testButtonText: {
-    color: '#007AFF',
+    color: '#ff9fda',
     fontSize: 16,
     fontWeight: '600',
   },
   testButtonTextDisabled: {
-    color: '#b3d4fc',
+    color: colors.textMuted,
   },
   success: {
-    color: '#34a853',
+    color: colors.success,
     textAlign: 'center',
     marginTop: 4,
   },
   errorText: {
-    color: '#d93025',
+    color: colors.error,
     textAlign: 'center',
     marginTop: 4,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#d1d1d6',
+    backgroundColor: colors.glassBorder,
     marginTop: 24,
   },
   switchRow: {
@@ -253,18 +275,22 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: '#f2f2f7',
+    borderRadius: radii.md,
   },
-  saveButton: {
-    backgroundColor: '#007AFF',
+  saveButtonWrapper: {
+    flex: 1,
+    borderRadius: radii.md,
+    overflow: 'hidden',
+  },
+  actionButtonInner: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   actionButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: colors.textPrimary,
   },
   saveButtonText: {
     color: '#fff',

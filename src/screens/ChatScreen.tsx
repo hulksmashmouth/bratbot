@@ -12,9 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { streamChat, OllamaError } from '../api/ollama';
 import { searchHistory } from '../api/rag';
 import { ChatInput } from '../components/ChatInput';
+import { GlassView } from '../components/GlassView';
+import { GradientText } from '../components/GradientText';
 import { MessageBubble } from '../components/MessageBubble';
 import { SettingsModal } from '../components/SettingsModal';
 import * as settings from '../settings';
+import { colors, spacing } from '../theme';
 import { ChatMessage } from '../types';
 
 let nextId = 0;
@@ -119,12 +122,12 @@ export function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>bratbot</Text>
+      <GlassView intensity={30} style={styles.header}>
+        <GradientText style={styles.headerTitle}>bratbot</GradientText>
         <Pressable onPress={() => setSettingsVisible(true)} hitSlop={12}>
           <Text style={styles.settingsLink}>Settings</Text>
         </Pressable>
-      </View>
+      </GlassView>
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -164,7 +167,7 @@ export function ChatScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
   },
   flex: {
     flex: 1,
@@ -173,31 +176,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#d1d1d6',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
   },
   settingsLink: {
-    color: '#007AFF',
+    color: '#ff9fda',
     fontSize: 16,
+    fontWeight: '600',
   },
   listContent: {
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     flexGrow: 1,
   },
   emptyText: {
     textAlign: 'center',
-    color: '#8e8e93',
+    color: colors.textMuted,
     marginTop: 40,
     paddingHorizontal: 32,
   },
   errorBanner: {
-    color: '#d93025',
+    color: colors.error,
     textAlign: 'center',
     paddingVertical: 6,
     paddingHorizontal: 16,

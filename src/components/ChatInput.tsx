@@ -1,5 +1,8 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { accentGradient, colors, radii, spacing } from '../theme';
+import { GlassView } from './GlassView';
 
 interface Props {
   disabled: boolean;
@@ -16,29 +19,40 @@ export function ChatInput({ disabled, onSend }: Props) {
     setText('');
   };
 
+  const canSend = !disabled && !!text.trim();
+
   return (
-    <View style={styles.container}>
+    <GlassView intensity={50} style={styles.container}>
       <TextInput
         style={styles.input}
         value={text}
         onChangeText={setText}
         placeholder="Message"
-        placeholderTextColor="#8e8e93"
+        placeholderTextColor={colors.placeholder}
         multiline
         editable={!disabled}
       />
-      <Pressable
-        style={[styles.sendButton, (disabled || !text.trim()) && styles.sendButtonDisabled]}
-        onPress={send}
-        disabled={disabled || !text.trim()}
-      >
-        {disabled ? (
-          <ActivityIndicator color="#fff" size="small" />
+      <Pressable onPress={send} disabled={!canSend}>
+        {canSend ? (
+          <LinearGradient
+            colors={accentGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.sendButton}
+          >
+            <Text style={styles.sendButtonText}>Send</Text>
+          </LinearGradient>
         ) : (
-          <Text style={styles.sendButtonText}>Send</Text>
+          <View style={[styles.sendButton, styles.sendButtonDisabled]}>
+            {disabled ? (
+              <ActivityIndicator color={colors.textSecondary} size="small" />
+            ) : (
+              <Text style={[styles.sendButtonText, styles.sendButtonTextDisabled]}>Send</Text>
+            )}
+          </View>
         )}
       </Pressable>
-    </View>
+    </GlassView>
   );
 }
 
@@ -46,36 +60,39 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#d1d1d6',
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderTopLeftRadius: radii.lg,
+    borderTopRightRadius: radii.lg,
   },
   input: {
     flex: 1,
     maxHeight: 120,
-    backgroundColor: '#f2f2f7',
-    borderRadius: 18,
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.pill,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 16,
-    marginRight: 8,
+    color: colors.textPrimary,
+    marginRight: spacing.sm,
   },
   sendButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 18,
+    borderRadius: radii.pill,
     paddingHorizontal: 16,
     paddingVertical: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    minWidth: 64,
   },
   sendButtonDisabled: {
-    backgroundColor: '#b3d4fc',
+    backgroundColor: colors.glassFillStrong,
   },
   sendButtonText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  sendButtonTextDisabled: {
+    color: colors.textMuted,
   },
 });

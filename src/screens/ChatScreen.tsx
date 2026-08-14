@@ -16,6 +16,7 @@ import { GlassView } from '../components/GlassView';
 import { GradientText } from '../components/GradientText';
 import { MessageBubble } from '../components/MessageBubble';
 import { SettingsModal } from '../components/SettingsModal';
+import { SYSTEM_PROMPT } from '../persona';
 import * as settings from '../settings';
 import { colors, spacing } from '../theme';
 import { ChatMessage } from '../types';
@@ -57,7 +58,10 @@ export function ChatScreen() {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    let apiMessages: ChatMessage[] = nextMessages;
+    let apiMessages: ChatMessage[] = [
+      { id: 'persona', role: 'system', content: SYSTEM_PROMPT },
+      ...nextMessages,
+    ];
     if (ragEnabled) {
       try {
         const results = await searchHistory(ragUrl, text, 4);
@@ -66,6 +70,7 @@ export function ChatScreen() {
             .map((r) => `[${r.title}, ${r.createTime}]\n${r.text}`)
             .join('\n\n---\n\n');
           apiMessages = [
+            { id: 'persona', role: 'system', content: SYSTEM_PROMPT },
             {
               id: 'rag-context',
               role: 'system',

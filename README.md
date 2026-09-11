@@ -1,4 +1,4 @@
-# bratbot
+# Dolly Pocket
 
 An iOS-first React Native (Expo) chat client for [Ollama](https://ollama.com), running locally on your Mac.
 
@@ -50,7 +50,7 @@ then tap **Test connection**.
 
 ## 3. Optional: import your ChatGPT history (RAG)
 
-bratbot can retrieve relevant snippets from your old ChatGPT conversations and
+Dolly Pocket can retrieve relevant snippets from your old ChatGPT conversations and
 feed them to Ollama as context before answering, so the model can reference
 things you've talked about before. This runs entirely on your Mac — the phone
 only ever talks to Ollama and a small local search server.

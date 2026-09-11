@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Serves the static web build (from `npx expo export --platform web`) so the
-// Pi's kiosk browser can load Bratbot from localhost instead of a dev server.
+// Pi's kiosk browser can load Dolly Pocket from localhost instead of a dev server.
 // Single-page app with no router, so any unmatched path falls back to
 // index.html rather than 404ing.
 

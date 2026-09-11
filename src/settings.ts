@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-const BASE_URL_KEY = 'bratbot.baseUrl';
-const MODEL_KEY = 'bratbot.model';
-const RAG_URL_KEY = 'bratbot.ragUrl';
-const RAG_ENABLED_KEY = 'bratbot.ragEnabled';
+const BASE_URL_KEY = 'dollypocket.baseUrl';
+const MODEL_KEY = 'dollypocket.model';
+const RAG_URL_KEY = 'dollypocket.ragUrl';
+const RAG_ENABLED_KEY = 'dollypocket.ragEnabled';
 
 export const DEFAULT_MODEL = 'llama3.2';
 

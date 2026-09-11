@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Serves nearest-neighbor search over the chunks produced by
-// scripts/import-chatgpt-export.mjs, so bratbot can retrieve relevant past
+// scripts/import-chatgpt-export.mjs, so Dolly Pocket can retrieve relevant past
 // ChatGPT conversations as context before calling Ollama's chat model.
 // Vector math stays here (on the Mac) rather than on the phone.
 

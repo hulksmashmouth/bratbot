@@ -1,11 +1,11 @@
-# Running Bratbot standalone on a Raspberry Pi 5
+# Running Dolly Pocket standalone on a Raspberry Pi 5
 
 Everything — Ollama, the RAG server, and the chat UI itself — running on one
 Pi, booting straight into a fullscreen kiosk. No phone, no Mac required.
 
 Assumes: Pi 5 8GB, NVMe SSD via a bottom-mount HAT (e.g. Pimoroni NVMe Base),
 Raspberry Pi OS Lite 64-bit, default `pi` user, repo cloned to
-`/home/pi/bratbot`. Adjust paths/usernames in the `.service` files if yours
+`/home/pi/dollypocket`. Adjust paths/usernames in the `.service` files if yours
 differ.
 
 ## 1. Flash & boot
@@ -52,8 +52,8 @@ first boot.
 
 ```sh
 cd /home/pi
-git clone <your-repo-url> bratbot
-cd bratbot
+git clone <your-repo-url> dollypocket
+cd dollypocket
 npm install
 npx expo export --platform web
 ```
@@ -67,16 +67,16 @@ update the kiosk.
 ```sh
 sudo cp deploy/pi/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now seatd bratbot-web bratbot-rag bratbot-kiosk
+sudo systemctl enable --now seatd dollypocket-web dollypocket-rag dollypocket-kiosk
 ```
 
-- **bratbot-web** — serves `dist/` on `:8080` (see
+- **dollypocket-web** — serves `dist/` on `:8080` (see
   [`server/static-server.mjs`](../../server/static-server.mjs))
-- **bratbot-rag** — chat-history retrieval on `:11435`, only useful if
+- **dollypocket-rag** — chat-history retrieval on `:11435`, only useful if
   you've run `npm run import-chatgpt-history` (see main
-  [README](../../README.md)); safe to `systemctl disable bratbot-rag` if
+  [README](../../README.md)); safe to `systemctl disable dollypocket-rag` if
   you're skipping RAG on this build
-- **bratbot-kiosk** — `cage` (minimal Wayland kiosk compositor) running
+- **dollypocket-kiosk** — `cage` (minimal Wayland kiosk compositor) running
   Chromium fullscreen against `localhost:8080`
 
 The app's `guessDefaultBaseUrl()`/`guessDefaultRagUrl()` already fall back to
@@ -86,8 +86,8 @@ this production case), so no Settings changes are needed on first boot.
 ## 6. Sanity checks
 
 ```sh
-systemctl status bratbot-web bratbot-rag bratbot-kiosk ollama
-journalctl -u bratbot-kiosk -f   # if the screen stays black
+systemctl status dollypocket-web dollypocket-rag dollypocket-kiosk ollama
+journalctl -u dollypocket-kiosk -f   # if the screen stays black
 curl localhost:8080              # should return the app's index.html
 curl localhost:11434/api/tags    # should list your pulled model(s)
 ```
@@ -99,7 +99,7 @@ curl localhost:11434/api/tags    # should list your pulled model(s)
   you seal anything permanently.
 - **cage/chromium black screen**: almost always `seatd` not running, or `pi`
   missing from the `seat`/`video`/`input` groups — check
-  `journalctl -u bratbot-kiosk` first.
+  `journalctl -u dollypocket-kiosk` first.
 - **DSI displays**: if you end up on a DSI panel instead of HDMI, you'll need
   the matching `dtoverlay` in `/boot/firmware/config.txt` — not covered here
   since the panel isn't picked yet.

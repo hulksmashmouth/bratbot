@@ -1,0 +1,27 @@
+[Unit]
+Description=Dolly Pocket kiosk display (cage + Chromium, fullscreen)
+After=dollypocket-web.service seatd.service
+Wants=seatd.service
+Requires=dollypocket-web.service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+# cage needs a runtime dir and DRM/input access (video+input+render groups,
+# plus seatd running) since there's no full display manager here.
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+ExecStart=/usr/bin/cage -- /usr/bin/chromium-browser \
+  --kiosk \
+  --noerrdialogs \
+  --disable-infobars \
+  --disable-translate \
+  --no-first-run \
+  --autoplay-policy=no-user-gesture-required \
+  --check-for-update-interval=31536000 \
+  http://localhost:8080
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical.target

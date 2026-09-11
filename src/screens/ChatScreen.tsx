@@ -128,7 +128,7 @@ export function ChatScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <GlassView intensity={30} style={styles.header}>
-        <GradientText style={styles.headerTitle}>bratbot</GradientText>
+        <GradientText style={styles.headerTitle}>Dolly Pocket</GradientText>
         <Pressable onPress={() => setSettingsVisible(true)} hitSlop={12}>
           <Text style={styles.settingsLink}>Settings</Text>
         </Pressable>

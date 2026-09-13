@@ -94,17 +94,46 @@ and tap **Check history index** to confirm it found your chunks. From then on,
 relevant past excerpts are silently retrieved and injected as context on every
 message — they don't show up as visible chat bubbles.
 
+## 4. Optional: read replies aloud (local TTS via Piper)
+
+Dolly Pocket can speak assistant replies using [Piper](https://github.com/OHF-Voice/piper1-gpl),
+a fully local/offline text-to-speech engine — no cloud service, no API key.
+Off by default; each assistant bubble gets a speaker button once it's set up.
+
+**Install Piper in a venv** (avoids fighting the system Python):
+
+```sh
+cd server
+python3 -m venv piper-venv
+piper-venv/bin/pip install piper-tts
+piper-venv/bin/python3 -m piper.download_voices en_US-amy-medium --data-dir voices
+```
+
+`en_US-amy-medium` is the warmest-sounding stock voice Piper ships — there's
+no genuinely Southern-accented option available locally.
+
+**Run the TTS server**, alongside `ollama serve`:
+
+```sh
+PYTHON_BIN=$(pwd)/server/piper-venv/bin/python3 npm run tts-server
+```
+
+It listens on port 11436. In the app's **Settings**, the TTS server URL is
+guessed the same way as Ollama's (same host, port 11436) — toggle **Read
+replies aloud** on and tap **Test connection** to confirm it can reach Piper.
+
 ## Project layout
 
 ```
 App.tsx                  entry point, wraps ChatScreen in SafeAreaProvider
 src/
   types.ts               ChatMessage type
-  settings.ts             AsyncStorage-backed server URL / model / RAG persistence
+  settings.ts             AsyncStorage-backed server URL / model / RAG / TTS persistence
   api/ollama.ts           streamChat() + listModels() against Ollama's HTTP API
   api/rag.ts               searchHistory() + checkRagHealth() against the RAG server
+  api/tts.ts               synthesizeSpeech() + checkTtsHealth() against the TTS server
   components/
-    MessageBubble.tsx
+    MessageBubble.tsx      renders replies + the per-bubble speaker button
     ChatInput.tsx
     SettingsModal.tsx
   screens/
@@ -112,7 +141,11 @@ src/
 server/
   rag-server.mjs           local HTTP server: embeds query via Ollama, cosine
                             similarity search over server/data/embeddings.json
-  data/                    git-ignored — your embedded chat history lives here
+  tts-server.mjs           local HTTP server: synthesizes speech via Piper,
+                            caches WAVs in server/data/tts-cache
+  data/                    git-ignored — your embedded chat history and TTS
+                            cache live here
+  voices/                  git-ignored — downloaded Piper voice models live here
 scripts/
   import-chatgpt-export.mjs  one-time (per export) script: chunk + embed
                               conversations.json into server/data/embeddings.json

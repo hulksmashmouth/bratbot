@@ -32,6 +32,8 @@ export function ChatScreen() {
   const [model, setModel] = useState('');
   const [ragUrl, setRagUrl] = useState('');
   const [ragEnabled, setRagEnabled] = useState(true);
+  const [ttsUrl, setTtsUrl] = useState('');
+  const [ttsEnabled, setTtsEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<FlatList<ChatMessage>>(null);
@@ -41,6 +43,8 @@ export function ChatScreen() {
     setModel(await settings.getModel());
     setRagUrl(await settings.getRagUrl());
     setRagEnabled(await settings.getRagEnabled());
+    setTtsUrl(await settings.getTtsUrl());
+    setTtsEnabled(await settings.getTtsEnabled());
   }, []);
 
   useEffect(() => {
@@ -112,16 +116,22 @@ export function ChatScreen() {
     newBaseUrl: string,
     newModel: string,
     newRagUrl: string,
-    newRagEnabled: boolean
+    newRagEnabled: boolean,
+    newTtsUrl: string,
+    newTtsEnabled: boolean
   ) => {
     await settings.setBaseUrl(newBaseUrl);
     await settings.setModel(newModel);
     await settings.setRagUrl(newRagUrl);
     await settings.setRagEnabled(newRagEnabled);
+    await settings.setTtsUrl(newTtsUrl);
+    await settings.setTtsEnabled(newTtsEnabled);
     setBaseUrl(newBaseUrl);
     setModel(newModel);
     setRagUrl(newRagUrl);
     setRagEnabled(newRagEnabled);
+    setTtsUrl(newTtsUrl);
+    setTtsEnabled(newTtsEnabled);
     setSettingsVisible(false);
   };
 
@@ -143,7 +153,9 @@ export function ChatScreen() {
           ref={listRef}
           data={messages}
           keyExtractor={(m) => m.id}
-          renderItem={({ item }) => <MessageBubble message={item} />}
+          renderItem={({ item }) => (
+            <MessageBubble message={item} ttsUrl={ttsUrl} ttsEnabled={ttsEnabled} />
+          )}
           contentContainerStyle={styles.listContent}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
           ListEmptyComponent={
@@ -162,6 +174,8 @@ export function ChatScreen() {
         model={model}
         ragUrl={ragUrl}
         ragEnabled={ragEnabled}
+        ttsUrl={ttsUrl}
+        ttsEnabled={ttsEnabled}
         onSave={handleSaveSettings}
         onClose={() => setSettingsVisible(false)}
       />

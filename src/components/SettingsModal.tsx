@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { listModels, OllamaError } from '../api/ollama';
 import { checkRagHealth } from '../api/rag';
+import { checkTtsHealth, TtsError } from '../api/tts';
 import { accentGradient, bgGradient, colors, radii, spacing } from '../theme';
 import { GlassView } from './GlassView';
 
@@ -22,7 +23,16 @@ interface Props {
   model: string;
   ragUrl: string;
   ragEnabled: boolean;
-  onSave: (baseUrl: string, model: string, ragUrl: string, ragEnabled: boolean) => void;
+  ttsUrl: string;
+  ttsEnabled: boolean;
+  onSave: (
+    baseUrl: string,
+    model: string,
+    ragUrl: string,
+    ragEnabled: boolean,
+    ttsUrl: string,
+    ttsEnabled: boolean
+  ) => void;
   onClose: () => void;
 }
 
@@ -34,6 +44,8 @@ export function SettingsModal({
   model,
   ragUrl,
   ragEnabled,
+  ttsUrl,
+  ttsEnabled,
   onSave,
   onClose,
 }: Props) {
@@ -41,12 +53,17 @@ export function SettingsModal({
   const [modelInput, setModelInput] = useState(model);
   const [ragUrlInput, setRagUrlInput] = useState(ragUrl);
   const [ragEnabledInput, setRagEnabledInput] = useState(ragEnabled);
+  const [ttsUrlInput, setTtsUrlInput] = useState(ttsUrl);
+  const [ttsEnabledInput, setTtsEnabledInput] = useState(ttsEnabled);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [status, setStatus] = useState<CheckStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [ragStatus, setRagStatus] = useState<CheckStatus>('idle');
   const [ragChunkCount, setRagChunkCount] = useState<number | null>(null);
   const [ragError, setRagError] = useState<string | null>(null);
+  const [ttsStatus, setTtsStatus] = useState<CheckStatus>('idle');
+  const [ttsVoice, setTtsVoice] = useState<string | null>(null);
+  const [ttsError, setTtsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -54,12 +71,16 @@ export function SettingsModal({
       setModelInput(model);
       setRagUrlInput(ragUrl);
       setRagEnabledInput(ragEnabled);
+      setTtsUrlInput(ttsUrl);
+      setTtsEnabledInput(ttsEnabled);
       setStatus('idle');
       setError(null);
       setRagStatus('idle');
       setRagError(null);
+      setTtsStatus('idle');
+      setTtsError(null);
     }
-  }, [visible, baseUrl, model, ragUrl, ragEnabled]);
+  }, [visible, baseUrl, model, ragUrl, ragEnabled, ttsUrl, ttsEnabled]);
 
   const testConnection = async () => {
     setStatus('checking');
@@ -84,6 +105,19 @@ export function SettingsModal({
     } catch (err) {
       setRagStatus('error');
       setRagError(err instanceof Error ? err.message : 'Could not connect.');
+    }
+  };
+
+  const testTtsConnection = async () => {
+    setTtsStatus('checking');
+    setTtsError(null);
+    try {
+      const { voice } = await checkTtsHealth(ttsUrlInput.trim());
+      setTtsVoice(voice);
+      setTtsStatus('ok');
+    } catch (err) {
+      setTtsStatus('error');
+      setTtsError(err instanceof TtsError ? err.message : 'Could not connect.');
     }
   };
 
@@ -174,6 +208,44 @@ export function SettingsModal({
             </Text>
           )}
           {ragStatus === 'error' && <Text style={styles.errorText}>{ragError}</Text>}
+
+          <View style={styles.divider} />
+
+          <View style={styles.switchRow}>
+            <Text style={styles.label}>Read replies aloud</Text>
+            <Switch
+              value={ttsEnabledInput}
+              onValueChange={setTtsEnabledInput}
+              trackColor={{ false: colors.glassFillStrong, true: accentGradient[0] }}
+              thumbColor="#fff"
+            />
+          </View>
+
+          <Text style={styles.label}>TTS server URL</Text>
+          <TextInput
+            style={styles.input}
+            value={ttsUrlInput}
+            onChangeText={setTtsUrlInput}
+            placeholder="http://192.168.1.x:11436"
+            placeholderTextColor={colors.placeholder}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            editable={ttsEnabledInput}
+          />
+
+          <Pressable style={styles.testButton} onPress={testTtsConnection} disabled={!ttsEnabledInput}>
+            {ttsStatus === 'checking' ? (
+              <ActivityIndicator color={colors.textPrimary} />
+            ) : (
+              <Text style={[styles.testButtonText, !ttsEnabledInput && styles.testButtonTextDisabled]}>
+                Test connection
+              </Text>
+            )}
+          </Pressable>
+
+          {ttsStatus === 'ok' && <Text style={styles.success}>Connected. Voice: {ttsVoice}</Text>}
+          {ttsStatus === 'error' && <Text style={styles.errorText}>{ttsError}</Text>}
         </ScrollView>
 
         <View style={styles.actions}>
@@ -185,7 +257,14 @@ export function SettingsModal({
           <Pressable
             style={styles.saveButtonWrapper}
             onPress={() =>
-              onSave(urlInput.trim(), modelInput.trim(), ragUrlInput.trim(), ragEnabledInput)
+              onSave(
+                urlInput.trim(),
+                modelInput.trim(),
+                ragUrlInput.trim(),
+                ragEnabledInput,
+                ttsUrlInput.trim(),
+                ttsEnabledInput
+              )
             }
           >
             <LinearGradient

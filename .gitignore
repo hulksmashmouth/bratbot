@@ -42,3 +42,7 @@ yarn-error.*
 
 # personal chat history + embeddings — never commit these
 /server/data/
+
+# Piper TTS venv + downloaded voice models — large, platform-specific, re-fetchable
+/server/piper-venv/
+/server/voices/

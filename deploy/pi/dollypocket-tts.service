@@ -1,0 +1,18 @@
+[Unit]
+Description=Dolly Pocket text-to-speech server (Piper)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/dollypocket
+Environment=PIPER_VOICE=en_US-amy-medium
+Environment=PIPER_DATA_DIR=/home/pi/dollypocket/server/voices
+Environment=PYTHON_BIN=/home/pi/dollypocket/server/piper-venv/bin/python3
+Environment=PORT=11436
+ExecStart=/usr/bin/node server/tts-server.mjs
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

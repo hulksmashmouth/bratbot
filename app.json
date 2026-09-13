@@ -33,6 +33,9 @@
         "projectId": "e0d8000b-5db4-4e3a-b92b-ad50c8f9f083"
       }
     },
-    "owner": "hulksmashmouth-dev"
+    "owner": "hulksmashmouth-dev",
+    "plugins": [
+      "expo-audio"
+    ]
   }
 }

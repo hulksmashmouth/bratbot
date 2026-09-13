@@ -27,7 +27,7 @@ differ.
 ## 2. Base packages
 
 ```sh
-sudo apt update && sudo apt install -y nodejs npm cage seatd chromium-browser git
+sudo apt update && sudo apt install -y nodejs npm cage seatd chromium-browser git python3-venv
 # Debian's seatd has no "seat" group (unlike Arch) — its seatd.service runs as
 # `seatd -g video`, so `video` is what grants seat access here. See Troubleshooting.
 sudo usermod -aG video,input,render pi
@@ -64,12 +64,30 @@ This produces `dist/`, a static build the Pi serves to itself — no Metro dev
 server involved. Re-run the export any time you change the app and want to
 update the kiosk.
 
-## 5. Install the services
+## 5. Optional: local text-to-speech (Piper)
+
+Lets the app read replies aloud, fully offline — no cloud TTS. Skip this
+section (and `dollypocket-tts` in the next step) if you don't want the
+feature; it's off by default in the app's Settings either way.
+
+```sh
+cd /home/pi/dollypocket/server
+python3 -m venv piper-venv
+piper-venv/bin/pip install piper-tts
+piper-venv/bin/python3 -m piper.download_voices en_US-amy-medium --data-dir voices
+```
+
+`en_US-amy-medium` is the warmest-sounding voice in Piper's stock catalog —
+there's no genuinely Southern-accented option, so this is as close as local
+TTS gets. Turn it on and point it at `http://localhost:11436` from the app's
+Settings sheet once `dollypocket-tts` (below) is running.
+
+## 6. Install the services
 
 ```sh
 sudo cp deploy/pi/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now seatd dollypocket-web dollypocket-rag dollypocket-kiosk
+sudo systemctl enable --now seatd dollypocket-web dollypocket-rag dollypocket-tts dollypocket-kiosk
 ```
 
 - **dollypocket-web** — serves `dist/` on `:8080` (see
@@ -78,20 +96,24 @@ sudo systemctl enable --now seatd dollypocket-web dollypocket-rag dollypocket-ki
   you've run `npm run import-chatgpt-history` (see main
   [README](../../README.md)); safe to `systemctl disable dollypocket-rag` if
   you're skipping RAG on this build
+- **dollypocket-tts** — Piper text-to-speech on `:11436` (see step 5 above);
+  safe to `systemctl disable dollypocket-tts` if you skipped that step
 - **dollypocket-kiosk** — `cage` (minimal Wayland kiosk compositor) running
   Chromium fullscreen against `localhost:8080`
 
-The app's `guessDefaultBaseUrl()`/`guessDefaultRagUrl()` already fall back to
-`localhost` when there's no Expo dev-server manifest present (i.e. exactly
-this production case), so no Settings changes are needed on first boot.
+The app's `guessDefaultBaseUrl()`/`guessDefaultRagUrl()`/`guessDefaultTtsUrl()`
+already fall back to `localhost` when there's no Expo dev-server manifest
+present (i.e. exactly this production case), so no Settings changes are
+needed on first boot beyond turning TTS on if you set it up.
 
-## 6. Sanity checks
+## 7. Sanity checks
 
 ```sh
-systemctl status dollypocket-web dollypocket-rag dollypocket-kiosk ollama
+systemctl status dollypocket-web dollypocket-rag dollypocket-tts dollypocket-kiosk ollama
 journalctl -u dollypocket-kiosk -f   # if the screen stays black
 curl localhost:8080              # should return the app's index.html
 curl localhost:11434/api/tags    # should list your pulled model(s)
+curl localhost:11436/health      # should report the configured Piper voice
 ```
 
 ## Known rough edges

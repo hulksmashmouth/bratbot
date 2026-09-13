@@ -10,8 +10,13 @@ interface Props extends ViewProps {
 export function GlassView({ intensity = 40, style, children, ...rest }: Props) {
   return (
     <View style={[styles.container, style]} {...rest}>
-      <BlurView intensity={intensity} tint="dark" style={StyleSheet.absoluteFill} />
-      <View style={[StyleSheet.absoluteFill, styles.tint]} />
+      <BlurView
+        intensity={intensity}
+        tint="light"
+        style={[StyleSheet.absoluteFill, styles.behind]}
+        pointerEvents="none"
+      />
+      <View style={[StyleSheet.absoluteFill, styles.tint, styles.behind]} pointerEvents="none" />
       {children}
     </View>
   );
@@ -25,5 +30,8 @@ const styles = StyleSheet.create({
   },
   tint: {
     backgroundColor: colors.glassFill,
+  },
+  behind: {
+    zIndex: -1,
   },
 });

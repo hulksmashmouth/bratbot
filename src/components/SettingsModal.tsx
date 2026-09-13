@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   testButtonText: {
-    color: '#ff9fda',
+    color: '#c1279a',
     fontSize: 16,
     fontWeight: '600',
   },

@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   settingsLink: {
-    color: '#ff9fda',
+    color: '#c1279a',
     fontSize: 16,
     fontWeight: '600',
   },

@@ -8,7 +8,7 @@ import { bgGradient } from './src/theme';
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <LinearGradient
         colors={bgGradient}
         start={{ x: 0, y: 0 }}

@@ -1,19 +1,20 @@
-export const bgGradient = ['#1a0b2e', '#3d1155', '#5b1a63'] as const;
-export const accentGradient = ['#ff6ec7', '#c96bff', '#8b5cf6'] as const;
+// Matched to the Polly Pocket compact: bubblegum-pink shell, lavender-purple hinge/trim.
+export const bgGradient = ['#ff7ac0', '#f050d0', '#a83de0'] as const;
+export const accentGradient = ['#ff2f9e', '#c928e0', '#7a2fd0'] as const;
 
 export const colors = {
   bgGradient,
   accentGradient,
-  glassFill: 'rgba(255,255,255,0.08)',
-  glassFillStrong: 'rgba(255,255,255,0.14)',
-  glassBorder: 'rgba(255,182,230,0.28)',
-  textPrimary: '#fdf2fb',
-  textSecondary: '#e3bfe8',
-  textMuted: 'rgba(253,242,251,0.55)',
-  placeholder: 'rgba(253,242,251,0.4)',
-  success: '#4ade80',
-  error: '#ff6b9d',
-  inputBg: 'rgba(255,255,255,0.10)',
+  glassFill: 'rgba(255,255,255,0.4)',
+  glassFillStrong: 'rgba(255,255,255,0.6)',
+  glassBorder: 'rgba(122,47,208,0.45)',
+  textPrimary: '#4a1352',
+  textSecondary: '#8a4a97',
+  textMuted: 'rgba(74,19,82,0.55)',
+  placeholder: 'rgba(74,19,82,0.35)',
+  success: '#1fa971',
+  error: '#d6317e',
+  inputBg: 'rgba(255,255,255,0.55)',
 };
 
 export const radii = { sm: 12, md: 18, lg: 24, pill: 999 };

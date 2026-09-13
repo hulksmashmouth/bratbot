@@ -42,8 +42,9 @@ createServer(async (req, res) => {
     res.end(data);
   } catch {
     try {
+      const indexData = await readIndex();
       res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(await readIndex());
+      res.end(indexData);
     } catch {
       res.writeHead(404);
       res.end(`Not found. Did you run "npx expo export --platform web" yet? Looked in ${DIST_DIR}`);

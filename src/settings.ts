@@ -6,7 +6,7 @@ const MODEL_KEY = 'dollypocket.model';
 const RAG_URL_KEY = 'dollypocket.ragUrl';
 const RAG_ENABLED_KEY = 'dollypocket.ragEnabled';
 
-export const DEFAULT_MODEL = 'llama3.2';
+export const DEFAULT_MODEL = 'qwen2.5:3b';
 
 // When running via Expo on the same Mac that hosts Ollama, the dev server's
 // host IP (from the Metro/Expo manifest) is the phone's route back to that Mac.

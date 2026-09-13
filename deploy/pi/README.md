@@ -28,7 +28,9 @@ differ.
 
 ```sh
 sudo apt update && sudo apt install -y nodejs npm cage seatd chromium-browser git
-sudo usermod -aG seat,video,input,render pi
+# Debian's seatd has no "seat" group (unlike Arch) — its seatd.service runs as
+# `seatd -g video`, so `video` is what grants seat access here. See Troubleshooting.
+sudo usermod -aG video,input,render pi
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
@@ -98,8 +100,46 @@ curl localhost:11434/api/tags    # should list your pulled model(s)
   inference load. Watch `vcgencmd measure_temp` under a chat session before
   you seal anything permanently.
 - **cage/chromium black screen**: almost always `seatd` not running, or `pi`
-  missing from the `seat`/`video`/`input` groups — check
-  `journalctl -u dollypocket-kiosk` first.
+  missing from the `video`/`input`/`render` groups (see Troubleshooting) —
+  check `journalctl -u dollypocket-kiosk` first.
 - **DSI displays**: if you end up on a DSI panel instead of HDMI, you'll need
   the matching `dtoverlay` in `/boot/firmware/config.txt` — not covered here
   since the panel isn't picked yet.
+
+## Troubleshooting
+
+- **No `seat` group on Debian**: Arch-based seatd setups add the user to a
+  `seat` group, but Raspberry Pi OS's `seatd` package doesn't create one —
+  its `seatd.service` runs as `seatd -g video`, so group membership is
+  granted through `video` instead. Add `pi` to `video`, `input`, and
+  `render` (step 2 above already does this); adding a nonexistent `seat`
+  group will just fail/no-op rather than granting anything.
+
+- **Testing from another device before a display arrives**: while setting up
+  headless, you may want to hit the app from a browser on your phone or
+  laptop instead of the Pi itself. `curl http://<pi-ip>:11434/api/tags` will
+  work fine, but the same request from a browser gets blocked by CORS even
+  though the server is reachable. Ollama needs to both bind to all
+  interfaces *and* explicitly allow cross-origin requests:
+  ```sh
+  sudo systemctl edit ollama
+  ```
+  ```ini
+  [Service]
+  Environment="OLLAMA_HOST=0.0.0.0"
+  Environment="OLLAMA_ORIGINS=*"
+  ```
+  ```sh
+  sudo systemctl restart ollama
+  ```
+  This is only needed for that cross-device testing window — on the final
+  kiosk setup, Chromium and Ollama both run on `localhost` on the same Pi,
+  so neither variable is required there.
+
+- **Waveshare 3.2" HDMI LCD (H) (480x800)**: this panel needs a custom
+  `hdmi_timings` line in `/boot/firmware/config.txt`:
+  ```
+  hdmi_timings=480 0 50 20 50 800 0 19 20 20 0 0 0 60 0 38000000 6
+  ```
+  Also note the Pi 5 has no full-size HDMI port — you'll need a
+  micro-HDMI-to-HDMI adapter to connect this panel.
